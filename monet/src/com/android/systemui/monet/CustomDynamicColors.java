@@ -24,11 +24,11 @@ import com.google.ux.material.libmonet.dynamiccolor.TonePolarity;
 
 import java.util.function.Supplier;
 
-public class CustomDynamicColors {
+class CustomDynamicColors {
     private final MaterialDynamicColors mMdc;
     public final Supplier<DynamicColor>[] allColors;
 
-    public CustomDynamicColors(boolean isExtendedFidelity) {
+    CustomDynamicColors(boolean isExtendedFidelity) {
         this.mMdc = new MaterialDynamicColors(isExtendedFidelity);
 
         allColors = new Supplier[]{
