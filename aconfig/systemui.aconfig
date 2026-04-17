@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+    name: "blueflax_first_phase"
+    namespace: "systemui"
+    description: "Enable Blueflax feature first phase."
+    bug: "483872198"
+}
+
+flag {
     name: "bouncer_area_exclusion"
     namespace : "systemui"
     description : "Exclusion List to calculated a default bouncer region on dream"
@@ -68,6 +75,13 @@ flag {
     namespace: "launcher"
     description: "Replace hybrid hotseat app predictions with strictly Recent Apps"
     bug: "315354060"
+}
+
+flag {
+  name: "enable_sage"
+  namespace: "ailabs"
+  description: "Enables Sage experience in SysUI/Launcher."
+  bug: "443160967"
 }
 
 flag {
@@ -169,4 +183,5 @@ flag {
     description: "Gives the user the option to hide app icon labels on the workspace"
     bug: "456634299"
 }
+
 # go/keep-sorted end

@@ -52,7 +52,6 @@ import com.android.launcher3.icons.cache.CacheLookupFlag.Companion.DEFAULT_LOOKU
 import com.android.launcher3.util.ComponentKey
 import com.android.launcher3.util.FlagOp
 import com.android.launcher3.util.SQLiteCacheHelper
-import com.android.systemui.shared.Flags.extendibleThemeManager
 import java.util.function.Supplier
 import kotlin.collections.MutableMap.MutableEntry
 
@@ -204,13 +203,19 @@ constructor(
         return if (format == null) label else String.format(format, label)
     }
 
-    fun <T> getIconLoadRequest(obj: T, cachingLogic: CachingLogic<T>) =
+    @JvmOverloads
+    fun <T> getIconLoadRequest(
+        obj: T,
+        cachingLogic: CachingLogic<T>,
+        lookupFlag: CacheLookupFlag = DEFAULT_LOOKUP_FLAG,
+    ) =
         IconLoadRequest(
             context = context,
             item = obj,
             logic = cachingLogic,
             cache = this,
             iconDpi = iconDpi,
+            lookupFlag = lookupFlag,
         )
 
     /**
@@ -332,7 +337,7 @@ constructor(
         user: UserHandle,
     ) {
         if (obj != null) {
-            entry.bitmap = getIconLoadRequest(obj, cachingLogic).evaluate()
+            entry.bitmap = getIconLoadRequest(obj, cachingLogic, lookupFlag).evaluate()
         } else {
             if (lookupFlag.usePackageIcon()) {
                 val packageEntry =
@@ -457,7 +462,8 @@ constructor(
 
                     // Load the full res icon for the application, but if useLowResIcon is set, then
                     // only keep the low resolution icon instead of the larger full-sized icon
-                    val iconInfo = getIconLoadRequest(appInfo, appInfoCachingLogic).evaluate()
+                    val iconInfo =
+                        getIconLoadRequest(appInfo, appInfoCachingLogic, lookupFlags).evaluate()
                     entry.bitmap =
                         if (lookupFlags.useLowRes()) BitmapInfo.of(LOW_RES_ICON, iconInfo.color)
                         else iconInfo
@@ -557,7 +563,7 @@ constructor(
                 return false
             }
 
-            if (!extendibleThemeManager() || lookupFlags.hasThemeIcon()) {
+            if (lookupFlags.hasThemeIcon()) {
                 // Always set a non-null theme bitmap if theming was requested
                 entry.bitmap = entry.bitmap.copy(themedBitmap = ThemedBitmap.NOT_SUPPORTED)
 
@@ -710,14 +716,13 @@ constructor(
         fun CacheLookupFlag.toLookupColumns() =
             when {
                 useLowRes() -> COLUMNS_LOW_RES
-                extendibleThemeManager() && !hasThemeIcon() -> COLUMNS_HIGH_RES_NO_THEME
+                !hasThemeIcon() -> COLUMNS_HIGH_RES_NO_THEME
                 else -> COLUMNS_HIGH_RES
             }
 
         @JvmStatic
         protected fun BitmapInfo.downSampleToLookupFlag(flag: CacheLookupFlag) =
             when {
-                !extendibleThemeManager() -> this
                 flag.useLowRes() -> BitmapInfo.of(LOW_RES_ICON, color)
                 !flag.hasThemeIcon() && themedBitmap != null -> copy(themedBitmap = null)
                 else -> this
